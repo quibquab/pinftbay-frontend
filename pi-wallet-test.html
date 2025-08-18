@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pi NFT Bay - Pi Wallet Test</title>
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: linear-gradient(135deg, #fef3e2 0%, #fef9c3 100%);
+            min-height: 100vh;
+        }
+        .header {
+            background: white;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .pi-logo {
+            width: 32px;
+            height: 32px;
+            background: #f97316;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        .connect-btn {
+            background: #f97316;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .connect-btn:hover {
+            background: #ea580c;
+        }
+        .main {
+            padding: 2rem;
+            text-align: center;
+        }
+        .title {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #1f2937;
+        }
+        .subtitle {
+            font-size: 1.25rem;
+            color: #6b7280;
+            margin-bottom: 2rem;
+        }
+        .status {
+            margin: 2rem 0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .success { background: #d1fae5; color: #065f46; }
+        .error { background: #fee2e2; color: #991b1b; }
+        .info { background: #dbeafe; color: #1e40af; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <div class="logo">
+                <div class="pi-logo">π</div>
+                <h1>Pi NFT Bay</h1>
+            </div>
+            <button class="connect-btn" onclick="connectPiWallet()" id="connectBtn">
+                Connect Pi Wallet
+            </button>
+        </div>
+    </div>
+    
+    <div class="main">
+        <div class="container">
+            <h2 class="title">🚀 Pi NFT Marketplace</h2>
+            <p class="subtitle">Your Premier Pi Network NFT Marketplace</p>
+            <p>Test Pi wallet connection and real Pi Network integration</p>
+            <div id="status"></div>
+        </div>
+    </div>
+
+    <script>
+        let isConnected = false;
+        
+        // Initialize Pi SDK when page loads
+        window.addEventListener('load', function() {
+            if (typeof Pi !== 'undefined') {
+                Pi.init({ version: "2.0", sandbox: false });
+                showStatus('Pi SDK loaded successfully! Ready to connect.', 'info');
+            } else {
+                showStatus('Pi SDK not available. Please use Pi Browser to test wallet connections.', 'error');
+            }
+        });
+
+        async function connectPiWallet() {
+            if (isConnected) {
+                disconnect();
+                return;
+            }
+
+            try {
+                showStatus('Connecting to Pi wallet...', 'info');
+                
+                if (typeof Pi === 'undefined') {
+                    throw new Error('Pi SDK not available. Please use Pi Browser.');
+                }
+
+                const scopes = ['payments', 'username'];
+                const onIncompletePaymentFound = (payment) => {
+                    console.log('Incomplete payment found:', payment);
+                    return Pi.completePayment(payment);
+                };
+
+                const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
+                
+                if (auth.accessToken) {
+                    isConnected = true;
+                    document.getElementById('connectBtn').textContent = 'Disconnect';
+                    showStatus(`✅ Successfully connected to Pi wallet!<br>
+                               👤 Username: @${auth.user.username}<br>
+                               🆔 User ID: ${auth.user.uid}<br>
+                               🔐 Access Token: ${auth.accessToken.substring(0, 20)}...`, 'success');
+                } else {
+                    throw new Error('No access token received');
+                }
+                
+            } catch (error) {
+                console.error('Pi wallet connection failed:', error);
+                showStatus(`❌ Connection failed: ${error.message}`, 'error');
+            }
+        }
+
+        function disconnect() {
+            isConnected = false;
+            document.getElementById('connectBtn').textContent = 'Connect Pi Wallet';
+            showStatus('Disconnected from Pi wallet', 'info');
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = message;
+            statusDiv.className = `status ${type}`;
+        }
+    </script>
+</body>
+</html>
