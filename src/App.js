@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Wallet, ShoppingCart, Eye, Star, Filter, Search } from 'lucide-react';
-
+import { Wallet } from 'lucide-react';
 const PiNFTMarketplace = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [user, setUser] = useState(null);
